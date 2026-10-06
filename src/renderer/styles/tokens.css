@@ -1,0 +1,128 @@
+/*
+ * Design tokens.
+ *
+ * Everything downstream keys off four attributes that src/renderer/shell.ts
+ * writes onto <html>:
+ *
+ *   data-theme    light | dark
+ *   data-vibrancy on | off      native window vibrancy actually active
+ *   data-focus    on | off      window focused
+ *   data-motion   full | reduced
+ *
+ * plus two custom properties set inline from the system accent colour:
+ * --accent and --accent-contrast. Because those arrive as inline styles they
+ * win over anything here, so this file only supplies the fallbacks used before
+ * the first theme event lands.
+ *
+ * HONEST CEILING: this is native window vibrancy plus CSS backdrop-filter. It
+ * is not macOS Liquid Glass. NSGlassEffectView is AppKit and SwiftUI only and
+ * is not exposed to Electron.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Overwritten inline by shell.ts from systemPreferences.getAccentColor(). */
+  --accent: #007aff;
+  --accent-contrast: #ffffff;
+
+  --ok: #1c8c3c;
+  --warn: #a35c00;
+  --bad: #cc2c22;
+
+  --bg: #eceef2;
+  --bg-elevated: rgba(255, 255, 255, 0.66);
+  --glass-bg: rgba(255, 255, 255, 0.58);
+  --glass-stroke: rgba(0, 0, 0, 0.1);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+
+  --text: rgba(0, 0, 0, 0.88);
+  --text-dim: rgba(0, 0, 0, 0.56);
+  --text-faint: rgba(0, 0, 0, 0.34);
+
+  /* Hairlines follow the text colour rather than being a fixed grey, so they
+     read correctly in both themes and on top of vibrancy. */
+  --hairline: color-mix(in srgb, currentColor 12%, transparent);
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --gap: 12px;
+
+  --shadow: 0 1px 1px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.1);
+
+  /* Internal. Not part of the published token contract. */
+  /* main/window.ts derives trafficLightPosition from this, so the native
+     traffic lights centre against it. Change one and change the other. */
+  --titlebar-h: 52px;
+  --sidebar-w: 216px;
+  --field-h: 28px;
+  --control-bg: rgba(255, 255, 255, 0.9);
+  --control-stroke: rgba(0, 0, 0, 0.14);
+  --hover: rgba(0, 0, 0, 0.055);
+  --pressed: rgba(0, 0, 0, 0.1);
+  --selected-inactive: rgba(0, 0, 0, 0.075);
+  --blur: blur(24px) saturate(180%);
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur: 140ms;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --ok: #37d05a;
+  --warn: #ffb340;
+  --bad: #ff6961;
+
+  --bg: #1b1b1d;
+  --bg-elevated: rgba(38, 38, 41, 0.62);
+  --glass-bg: rgba(255, 255, 255, 0.07);
+  --glass-stroke: rgba(255, 255, 255, 0.1);
+  --glass-highlight: rgba(255, 255, 255, 0.16);
+
+  --text: rgba(255, 255, 255, 0.92);
+  --text-dim: rgba(255, 255, 255, 0.6);
+  --text-faint: rgba(255, 255, 255, 0.38);
+
+  --shadow: 0 1px 1px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.44);
+
+  --control-bg: rgba(255, 255, 255, 0.08);
+  --control-stroke: rgba(255, 255, 255, 0.14);
+  --hover: rgba(255, 255, 255, 0.07);
+  --pressed: rgba(255, 255, 255, 0.12);
+  --selected-inactive: rgba(255, 255, 255, 0.1);
+}
+
+/* With native vibrancy the window itself is the material, so the page must not
+   paint a ground of its own or the blur never shows through. */
+:root[data-vibrancy='on'] {
+  --bg: transparent;
+}
+
+:root[data-vibrancy='off'] {
+  --bg-elevated: color-mix(in srgb, var(--bg) 88%, white 12%);
+  --glass-bg: color-mix(in srgb, var(--bg) 82%, white 18%);
+  --blur: none;
+}
+
+:root[data-theme='dark'][data-vibrancy='off'] {
+  --bg-elevated: color-mix(in srgb, var(--bg) 84%, white 16%);
+  --glass-bg: color-mix(in srgb, var(--bg) 76%, white 24%);
+}
+
+/* macOS drains colour out of an unfocused window. Text stays legible, the
+   accent stops shouting, the shadow flattens. The accent itself is an inline
+   custom property so it cannot be overridden here; components dim it instead. */
+:root[data-focus='off'] {
+  --text: rgba(0, 0, 0, 0.7);
+  --text-dim: rgba(0, 0, 0, 0.46);
+  --text-faint: rgba(0, 0, 0, 0.28);
+  --shadow: 0 1px 1px rgba(0, 0, 0, 0.05), 0 6px 16px rgba(0, 0, 0, 0.07);
+}
+
+:root[data-theme='dark'][data-focus='off'] {
+  --text: rgba(255, 255, 255, 0.76);
+  --text-dim: rgba(255, 255, 255, 0.5);
+  --text-faint: rgba(255, 255, 255, 0.32);
+  --shadow: 0 1px 1px rgba(0, 0, 0, 0.34), 0 8px 22px rgba(0, 0, 0, 0.34);
+}

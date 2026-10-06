@@ -1,0 +1,88 @@
+appId: io.github.shanto462.slackcode
+productName: slack-code
+copyright: Copyright (c) 2026 Md. Shalah Uddin
+
+# `output` is the DEFAULT, and `npm run dist` deliberately overrides it.
+#
+# This checkout lives under ~/Desktop, which macOS syncs through a file
+# provider (iCloud Desktop & Documents). electron-builder extracts Electron's
+# prebuilt zip straight into the output directory, and the file provider then
+# stamps `com.apple.FinderInfo` onto the nine helper bundles inside it. codesign
+# refuses those outright:
+#
+#   ⨯ slack-code Helper (GPU): resource fork, Finder information, or similar
+#     detritus not allowed
+#
+# The attribute cannot be cleared: `xattr -cr` leaves all nine in place, because
+# the provider owns them (`com.apple.fileprovider.fpfs#P` sits beside each one).
+# An afterPack hook was tried and does not work for the same reason.
+#
+# Building anywhere outside the synced tree signs cleanly and was verified end
+# to end, so the `dist` script sends output to ~/Library/Caches by default.
+# Override with SLACK_CODE_RELEASE_DIR. On a checkout that is not inside a
+# synced folder, plain `electron-builder` with the value below is fine.
+directories:
+  output: release
+  buildResources: build
+
+# Only the bundler output plus the manifest. Production node_modules are
+# collected separately by electron-builder and always ship, so the three runtime
+# dependencies and the matching platform binary come along automatically while
+# electron, electron-vite and typescript do not.
+files:
+  - out/**
+  - package.json
+
+asar: true
+
+# What makes src/main/binary.ts work. The agent SDK resolves its CLI through
+# require.resolve, which under asar returns a path inside app.asar. existsSync
+# says true there because Electron patches fs, but spawn() cannot execute a file
+# inside an archive, so the binary has to sit on the real filesystem.
+# Only the platform package matches this glob; the SDK's own JavaScript stays
+# packed, which is what the app.asar -> app.asar.unpacked rewrite expects.
+asarUnpack:
+  - "**/node_modules/@anthropic-ai/claude-agent-sdk-*/**"
+
+# There are no native modules in this project, by design: storage is node:sqlite,
+# which ships inside Electron. So there is nothing to rebuild against Electron's
+# ABI, and skipping the pass keeps the build honest about that.
+npmRebuild: false
+
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - target: dir
+      arch:
+        - arm64
+  icon: build/icon.png
+
+  # Ad-hoc, NOT unsigned. electron-builder treats `identity: null` as "skip code
+  # signing entirely", and an unsigned bundle is killed on launch on Apple
+  # Silicon because building the app invalidates the signature Electron shipped
+  # with. `-` is the ad-hoc qualifier and produces a signature that launches
+  # locally. It is still not a Developer ID: no notarization, no distribution.
+  identity: "-"
+
+  # Only meaningful for notarized distribution, and ad-hoc signing plus hardened
+  # runtime is the combination that trips library validation at launch.
+  hardenedRuntime: false
+  gatekeeperAssess: false
+
+  # LSUIElement is deliberately NOT set. The setup flow requires pasting Slack
+  # tokens, which needs a real Edit menu for Cmd+V. Menu-bar-only behaviour comes
+  # from app.setActivationPolicy('accessory') at runtime instead, which can be
+  # turned back on when a window opens.
+  extendInfo:
+    LSMinimumSystemVersion: "12.0.0"
+    NSHumanReadableCopyright: Copyright (c) 2026 Md. Shalah Uddin
+
+# Template images for the tray, kept outside the asar so nativeImage always
+# reads a real file. They land at Contents/Resources/trayTemplate.png and
+# Contents/Resources/trayTemplate@2x.png; the @2x variant is picked up
+# automatically by AppKit and must never be passed as a path.
+extraResources:
+  - from: build/trayTemplate.png
+    to: trayTemplate.png
+  - from: build/trayTemplate@2x.png
+    to: trayTemplate@2x.png

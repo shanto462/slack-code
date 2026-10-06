@@ -1,0 +1,47 @@
+<!--
+  Menu bar icon source. Rasterised to trayTemplate.png (16) and
+  trayTemplate@2x.png (32) by `npm run icons`.
+
+  A macOS template image is PURE BLACK PLUS ALPHA and nothing else. macOS derives
+  the light and dark menu bar appearance, and the selected state, from the alpha
+  channel alone, so colour would be discarded and anti-aliased grey is just lower
+  alpha. The "Template" suffix on the filename switches that behaviour on.
+
+  PIXEL GRID. This file is the 1x icon only; trayTemplate@2x.svg is its own
+  hand-tuned source. Every
+  edge sits on an integer and every cut-out stroke is an even width centred on an
+  integer, so a 2 wide stroke covers two whole pixels instead of bleeding a half
+  pixel either side. The previous version used 1.5 wide strokes on half-pixel
+  centres, which rendered as grey mush at 1x while looking fine at 2x.
+
+  Solid silhouette with the prompt knocked out, rather than thin outlines: an
+  outline that survives 2x reliably falls apart at 1x.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <defs>
+    <mask id="cut">
+      <rect x="0" y="0" width="16" height="16" fill="#000"/>
+
+      <!-- Bubble, x 1..15 so its centre is exactly 8, plus a tail bottom left. -->
+      <path fill="#FFF" d="M 3 2
+               h 10 a 2 2 0 0 1 2 2
+               v 6 a 2 2 0 0 1 -2 2
+               h -6
+               l -3 2.6 a 0.5 0.5 0 0 1 -0.8 -0.4
+               v -2.2
+               h -0.2 a 2 2 0 0 1 -2 -2
+               v -6 a 2 2 0 0 1 2 -2 z"/>
+
+      <!-- Prompt, centred on the bubble at (8, 7). Content spans x 4..12. -->
+      <!-- At 1x the underscore is dropped. Bubble plus chevron plus underscore
+           is three elements inside roughly 10x8 px, which smears whatever the
+           alignment; the chevron alone stays unmistakable. The 2x source keeps
+           the full prompt because it has the room. -->
+      <g fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6,4 9,7 6,10"/>
+      </g>
+    </mask>
+  </defs>
+
+  <rect x="0" y="0" width="16" height="16" fill="#000000" mask="url(#cut)"/>
+</svg>

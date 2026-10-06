@@ -1,0 +1,241 @@
+/* The window shape: a full-width draggable titlebar, then sidebar and detail. */
+
+.app-shell {
+  display: grid;
+  block-size: 100%;
+  grid-template-rows: var(--titlebar-h) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  isolation: isolate;
+}
+
+/*
+ * A view may render its own .app-shell, or it may put the titlebar and the pane
+ * straight into #root. Both have to fill the window, otherwise the pane sizes
+ * to its content and leaves dead space under it. When #root holds the titlebar
+ * itself, it becomes the shell grid; when it holds an .app-shell, this does not
+ * match and the shell's own block-size: 100% does the work.
+ */
+#root:has(> .titlebar) {
+  display: grid;
+  grid-template-rows: var(--titlebar-h) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  isolation: isolate;
+}
+
+#root:has(> .titlebar):has(> .sidebar) {
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+}
+
+#root > .titlebar {
+  grid-column: 1 / -1;
+}
+
+/* A view with a sidebar (the dashboard) gets two columns. A view without one
+   (the setup wizard) keeps the single column and needs no extra class. */
+.app-shell:has(> .sidebar) {
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+}
+
+.app-shell > .titlebar {
+  grid-column: 1 / -1;
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  /*
+   * Clears the native traffic lights, which float over this bar. MEASURED, not
+   * derived: Electron's trafficLightPosition.x did not move the cluster's left
+   * edge the way its name suggests, and at 82px the green button ended up
+   * touching the title. Widening our own padding is the lever that cannot
+   * misfire, since it only moves our content and never the native buttons.
+   */
+  padding: 0 14px 0 96px;
+  /* Height comes from the grid row inside .app-shell; this keeps the bar the
+     right size anywhere else, including the shell's fallback drag region. */
+  min-block-size: var(--titlebar-h);
+  min-inline-size: 0;
+  border-block-end: 1px solid var(--hairline);
+}
+
+.titlebar h1 {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.titlebar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-block-size: 0;
+  padding: 10px 10px 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Deliberately transparent: this is the most vibrant surface in the window. */
+  background: transparent;
+  border-inline-end: 1px solid var(--hairline);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.sidebar-nav + .sidebar-nav {
+  margin-block-start: 14px;
+}
+
+.sidebar h2,
+.sidebar-nav > .section-label {
+  padding: 6px 8px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 28px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  text-align: start;
+  inline-size: 100%;
+  cursor: default;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+.nav-item:hover {
+  background: var(--hover);
+}
+
+.nav-item:active {
+  background: var(--pressed);
+}
+
+.nav-item[aria-current='page'] {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 500;
+}
+
+.nav-item[aria-current='page'] .nav-item-badge,
+.nav-item[aria-current='page'] .muted {
+  color: inherit;
+  opacity: 0.8;
+}
+
+/* An unfocused macOS window shows its selection in grey, not in the accent. */
+:root[data-focus='off'] .nav-item[aria-current='page'] {
+  background: var(--selected-inactive);
+  color: var(--text);
+}
+
+.nav-item-badge {
+  margin-inline-start: auto;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  min-block-size: 0;
+  background: var(--bg-elevated);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  flex: 0 0 auto;
+  padding: 14px 18px;
+  min-inline-size: 0;
+  border-block-end: 1px solid var(--hairline);
+}
+
+.detail-header p {
+  color: var(--text-dim);
+}
+
+.detail-body {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  padding: 18px;
+  overflow-y: auto;
+  /* Never sideways. Anything wider than the pane gets its own .scroll-x box. */
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/*
+ * A scrolling column must not squeeze what is inside it. Without this, flex
+ * shrinks every card to fit the viewport and their contents overlap, which is
+ * the single easiest way to make this layout look broken.
+ * flex-shrink only, so .grow keeps growing.
+ */
+.detail-body > *,
+.sidebar > * {
+  flex-shrink: 0;
+}
+
+/* Three primitives that cover almost every arrangement in the app. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  min-inline-size: 0;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-inline-size: 0;
+}
+
+.spread {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+  min-inline-size: 0;
+}
+
+.row-tight {
+  gap: 6px;
+}
+
+.stack-tight {
+  gap: 6px;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}

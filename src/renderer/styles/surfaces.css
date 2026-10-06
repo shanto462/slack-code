@@ -1,0 +1,140 @@
+/*
+ * Glass surfaces.
+ *
+ * Layering, outermost first: native window vibrancy, then the calmer .detail
+ * pane, then translucent cards on top of it. The specular highlight on the top
+ * edge is the part that sells the material, so it is on every glass surface.
+ *
+ * Radii are concentric: a card is --radius-lg (16px) with 14px of padding, so
+ * anything sitting flush inside it is --radius-sm (6px) rather than a value
+ * picked at random.
+ */
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--glass-stroke);
+  border-radius: var(--radius);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--shadow);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  background: var(--glass-bg);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--glass-stroke);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--shadow);
+  /* Keeps header and footer tints inside the rounded corners. */
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  flex: 0 0 auto;
+  padding: 11px 14px;
+  min-inline-size: 0;
+  border-block-end: 1px solid var(--hairline);
+}
+
+.card-header h2,
+.card-header h3 {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-header .card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-inline-start: auto;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  flex: 1 1 auto;
+  min-block-size: 0;
+  min-inline-size: 0;
+  padding: 14px;
+}
+
+/* A body whose only child is a table wants no padding of its own. */
+.card-body.is-flush {
+  padding: 0;
+  gap: 0;
+}
+
+/* Same rule as .detail-body: nothing inside a card gets squeezed below its own
+   content, or the footer lands on top of the body. */
+.card > *,
+.card-body > * {
+  flex-shrink: 0;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  min-inline-size: 0;
+  border-block-start: 1px solid var(--hairline);
+  background: color-mix(in srgb, currentColor 3%, transparent);
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.card-footer .btn {
+  margin-inline-start: auto;
+}
+
+/*
+ * .hairline has two jobs, told apart by whether the element has content.
+ *
+ *   <hr class="hairline">            a separator on its own
+ *   <div class="hairline">           the same, written as a div
+ *   <div class="row spread hairline">a ROW that carries a rule under it
+ *
+ * The second form is what the wizard uses for its settings-style lists. Giving
+ * every .hairline `block-size: 0` would collapse those rows and their content
+ * would land on top of the next one, so the empty case is matched explicitly.
+ */
+.hairline:empty,
+hr.hairline {
+  flex: 0 0 auto;
+  border: 0;
+  border-block-start: 1px solid var(--hairline);
+  block-size: 0;
+  inline-size: 100%;
+  margin: 0;
+}
+
+.hairline:not(:empty) {
+  flex-shrink: 0;
+  padding-block-end: 10px;
+  border-block-end: 1px solid var(--hairline);
+}
+
+/* No trailing rule against the edge of the container. */
+.hairline:not(:empty):last-child {
+  padding-block-end: 0;
+  border-block-end: 0;
+}
+
+.hairline-vertical {
+  border: 0;
+  border-inline-start: 1px solid var(--hairline);
+  inline-size: 0;
+  align-self: stretch;
+  margin: 0;
+}

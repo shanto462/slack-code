@@ -1,0 +1,19 @@
+node_modules/
+
+# electron-vite output, and the packaged .app
+out/
+release/
+
+# Migration inputs from the headless daemon. Both are read once on first launch
+# and then left alone, and neither belongs in the repo.
+.env
+.env.*
+!.env.example
+.state/
+
+# Per-machine Claude Code settings. The shared project settings stay committable.
+.claude/settings.local.json
+
+*.log
+*.tsbuildinfo
+.DS_Store

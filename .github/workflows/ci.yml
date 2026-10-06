@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Read-only token. Nothing in this workflow writes to the repo.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: check
+    # The app only runs on macOS, so CI builds where it runs. Public repos get
+    # macOS runners for free.
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      # Actions are pinned to a full commit SHA, so a moved tag cannot change
+      # what runs here. Dependabot keeps the pins current.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # .nvmrc sits at the floor's major version. 22.12 and older fail the
+      # storage tests, because node:sqlite only lost its flag in 22.13.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck and unit tests
+        run: npm run check
+
+      - name: Bundle
+        run: npm run build

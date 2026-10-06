@@ -1,0 +1,22 @@
+{
+  // Everything that runs on the Node side of Electron: the main process, the
+  // preload bundle, the headless core, and this repo's own build config.
+  //
+  // src/core is included on purpose. It is checked here even though it never
+  // imports electron, because that is the only way `npm run typecheck` covers
+  // it at all.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    // "electron" is not an @types package; tsc falls back to node resolution
+    // and picks up node_modules/electron/electron.d.ts through its "types" field.
+    "types": ["node", "electron"]
+  },
+  "include": [
+    "src/main/**/*.ts",
+    "src/preload/**/*.ts",
+    "src/core/**/*.ts",
+    "src/shared/**/*.ts",
+    "electron.vite.config.ts"
+  ]
+}

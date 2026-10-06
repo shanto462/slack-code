@@ -1,0 +1,279 @@
+/*
+ * The setup wizard, shaped like a macOS assistant rather than an enterprise
+ * form: one centred column, a slim progress strip instead of a numbered rail,
+ * and a footer that owns Back and Continue.
+ *
+ * The old left rail listed all ten steps permanently. That is a web pattern; it
+ * ate a third of the window, competed with the content for attention, and put a
+ * wall of dim text next to the thing you were meant to be reading.
+ */
+
+.wizard {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+/* --- progress strip ------------------------------------------------------ */
+
+.wizard-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  padding: 16px 26px 12px;
+  border-block-end: 1px solid var(--hairline);
+}
+
+.wizard-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wizard-dot {
+  inline-size: 6px;
+  block-size: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--control-stroke);
+  cursor: default;
+  transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+
+.wizard-dot:not(:disabled) {
+  cursor: pointer;
+}
+
+.wizard-dot[data-state='done'] {
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.wizard-dot[data-state='error'] {
+  background: var(--bad);
+}
+
+/* The current step reads as a capsule rather than a bigger dot, so the strip
+   keeps its rhythm instead of jumping as you advance. */
+.wizard-dot[aria-current='step'] {
+  inline-size: 18px;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+.wizard-progress-caption {
+  color: var(--text-faint);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- body ---------------------------------------------------------------- */
+
+.wizard-body {
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  min-block-size: 0;
+  min-inline-size: 0;
+  padding: 26px 26px 30px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* One centred column of readable width. */
+.wizard-body > * {
+  max-inline-size: 560px;
+  inline-size: 100%;
+  flex-shrink: 0;
+}
+
+/*
+ * A step may reuse the detail pane pair, .detail-header + .detail-body. Then
+ * .wizard-body is a pane, not a column: the inner .detail-body owns scrolling,
+ * so it must be allowed to SHRINK to the pane. Without restoring flex-shrink
+ * the inner pane kept its content height, overflowed a parent set to
+ * overflow:hidden, and the last card was simply clipped with no way to reach
+ * it. That was the "content not scrollable" bug.
+ */
+.wizard-body:has(> .detail-body) {
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  align-items: stretch;
+}
+
+.wizard-body:has(> .detail-body) > * {
+  max-inline-size: none;
+  flex-shrink: 1;
+  min-block-size: 0;
+}
+
+.wizard-body:has(> .detail-body) > .detail-body {
+  flex: 1 1 auto;
+}
+
+/* The pane's own content still gets the readable column. */
+.wizard-body > .detail-body > * {
+  max-inline-size: 560px;
+  inline-size: 100%;
+  margin-inline: auto;
+}
+
+.wizard-body h1 {
+  font-size: 20px;
+  letter-spacing: -0.015em;
+}
+
+.wizard-body > p {
+  color: var(--text-dim);
+  max-inline-size: 62ch;
+}
+
+.wizard-footer {
+  grid-row: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 12px 26px;
+  border-block-start: 1px solid var(--hairline);
+}
+
+/* The row inside the footer is the thing that must span it, otherwise the
+   buttons bunch up on the left however the children are spaced. */
+.wizard-footer > .row {
+  inline-size: 100%;
+}
+
+.wizard-footer .row.spread {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Back sits left; the status text takes the slack; the primary sits right. */
+.wizard-footer .field-hint[role='status'] {
+  flex: 1 1 auto;
+  text-align: center;
+  margin: 0;
+}
+
+.wizard-footer .btn-ghost:first-child {
+  flex: 0 0 auto;
+}
+
+/* --- welcome step -------------------------------------------------------- */
+
+.wizard-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  padding-block: 8px 4px;
+}
+
+.wizard-hero-mark {
+  display: grid;
+  place-items: center;
+  inline-size: 56px;
+  block-size: 56px;
+  border-radius: 14px;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 92%, white 8%),
+    color-mix(in srgb, var(--accent) 78%, black 22%));
+  box-shadow: 0 1px 0 color-mix(in srgb, white 28%, transparent) inset,
+    0 6px 16px color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--accent-contrast);
+  font-size: 26px;
+  line-height: 1;
+}
+
+.wizard-hero-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.wizard-hero-lede {
+  margin: 0;
+  max-inline-size: 44ch;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Feature lines. Separators rather than boxes: one card per point turns four
+   short sentences into four competing panels. */
+.wizard-points {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  overflow: hidden;
+}
+
+.wizard-point {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 11px 14px;
+}
+
+.wizard-point + .wizard-point {
+  border-block-start: 1px solid var(--hairline);
+}
+
+.wizard-point-title {
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--text);
+}
+
+.wizard-point-detail {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+
+.wizard-footnote {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 11.5px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* A step that leads with a hero states its own name, so the pane header would
+   just print the title twice. */
+.wizard-body:has(.wizard-hero) > .detail-header {
+  display: none;
+}
+
+/* The pane header sits above centred content, so centre it too rather than
+   leaving the title hard left over a middle column. */
+.wizard-body > .detail-header {
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-align: center;
+  padding: 18px 26px 14px;
+}
+
+.wizard-body > .detail-header > h2 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.wizard-body > .detail-header > .field-hint {
+  max-inline-size: 52ch;
+}

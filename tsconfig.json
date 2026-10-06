@@ -1,0 +1,37 @@
+{
+  // Base only. Nothing is compiled from this file; it exists so tsconfig.node.json
+  // and tsconfig.web.json cannot drift apart. `npm run typecheck` runs the two
+  // leaf configs directly.
+  //
+  // Vite transpiles with esbuild, so TypeScript here is a pure checker:
+  // noEmit everywhere, no outDir, no rootDir.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+
+    // Required, not cosmetic. Without it the agent SDK's transitive
+    // @modelcontextprotocol/sdk fails with "Cannot find name 'HeadersInit'"
+    // because the node config has no DOM lib.
+    "skipLibCheck": true,
+
+    // Required by the .ts import convention (import './x.ts'), which is what
+    // lets `node --experimental-strip-types --test` run core with no bundler.
+    // Without this tsc raises TS5097.
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+
+    // Node's type stripping cannot infer which imports are type-only, so they
+    // must be written as `import type`. This flag enforces that at check time.
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "files": []
+}

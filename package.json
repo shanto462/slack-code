@@ -1,0 +1,51 @@
+{
+  "name": "slack-code",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "main": "./out/main/index.mjs",
+  "description": "Drive Claude Code sessions from Slack DMs. One thread = one project, bound by an alias on the first line.",
+  "author": "Md. Shalah Uddin (https://github.com/shanto462)",
+  "license": "MIT",
+  "homepage": "https://github.com/shanto462/slack-code#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shanto462/slack-code.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shanto462/slack-code/issues"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "start": "electron-vite preview",
+    "typecheck": "tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.web.json --noEmit",
+    "test": "node --experimental-strip-types --test \"src/core/**/*.test.ts\"",
+    "test:watch": "node --experimental-strip-types --test --watch \"src/core/**/*.test.ts\"",
+    "doctor": "electron-vite build && electron . --doctor",
+    "selftest": "electron-vite build && electron . --selftest",
+    "whoami": "node probe-account.mjs",
+    "check": "npm run typecheck && npm run test",
+    "dist": "npm run check && electron-vite build && electron-builder --mac --arm64 -c.directories.output=\"${SLACK_CODE_RELEASE_DIR:-$HOME/Library/Caches/slack-code/release}\"",
+    "autostart:install": "node scripts/install-autostart.mjs",
+    "autostart:uninstall": "node scripts/install-autostart.mjs --uninstall",
+    "icons": "electron build/make-icons.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.236",
+    "@slack/socket-mode": "^2.0.4",
+    "@slack/web-api": "^7.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "electron": "43.7.7",
+    "electron-builder": "26.15.3",
+    "electron-vite": "5.0.0",
+    "typescript": "^5.7.2",
+    "vite": "^7.1.5"
+  }
+}

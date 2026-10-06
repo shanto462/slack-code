@@ -1,0 +1,74 @@
+name: Bug report
+description: Something does not work the way the README says it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Security problems go through [private reporting](https://github.com/shanto462/slack-code/security/advisories/new), not here.
+
+        **Before you paste anything:** remove Slack tokens (`xoxb-`, `xapp-`), real Slack user and channel IDs, and private paths. This issue is public.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+      placeholder: |
+        I sent `myproject` and a prompt in a new DM thread. I expected a reply in the thread.
+        The hourglass reaction appeared and then nothing happened for 20 minutes.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start the app with `npx electron .`
+        2. DM the bot `myproject` on the first line and `hello` on the second
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Doctor output
+      description: Output of `npx electron . --doctor`, with secrets removed.
+      render: text
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log lines
+      description: From `~/Library/Logs/slack-code/slack-code.log`, with secrets removed.
+      render: text
+
+  - type: input
+    id: commit
+    attributes:
+      label: Commit
+      description: Output of `git rev-parse --short HEAD`.
+      placeholder: 1a2b3c4
+    validations:
+      required: true
+
+  - type: dropdown
+    id: run-mode
+    attributes:
+      label: How you run it
+      options:
+        - Unpackaged (npx electron . or the LaunchAgent)
+        - Packaged app (npm run dist)
+        - Dev server (npm run dev)
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: macOS and Node.js versions
+      placeholder: macOS 26.1 on Apple Silicon, Node.js 22.18.0
+    validations:
+      required: true

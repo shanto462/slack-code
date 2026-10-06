@@ -1,0 +1,13 @@
+{
+  // The renderer: the shell, the setup wizard and the dashboard.
+  //
+  // types is deliberately empty. The renderer is sandboxed and has no node
+  // globals at runtime, so it must not typecheck as if it did. Everything it
+  // can reach goes through window.api, whose shape comes from src/shared.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": []
+  },
+  "include": ["src/renderer/**/*.ts", "src/shared/**/*.ts"]
+}

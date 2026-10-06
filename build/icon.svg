@@ -1,0 +1,57 @@
+<!--
+  App icon source. Rasterised to build/icon.png by `npm run icons`.
+
+  Geometry follows the macOS icon grid rather than filling the canvas: the body
+  is 824x824 inside a 1024 square, leaving the ~10% padding every other icon in
+  the Dock has, and the corner radius is 22.4% of the body. A tighter radius on a
+  full-bleed square is the usual tell of an icon that was not drawn for macOS.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4E8CFF"/>
+      <stop offset="0.55" stop-color="#2C6BF2"/>
+      <stop offset="1" stop-color="#1B4FD8"/>
+    </linearGradient>
+
+    <!-- The soft top-edge sheen macOS icons carry, kept subtle. -->
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.30"/>
+      <stop offset="0.42" stop-color="#FFFFFF" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <filter id="drop" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="14" stdDeviation="22" flood-color="#0A2A6B" flood-opacity="0.34"/>
+    </filter>
+
+    <!-- The prompt is knocked out of the bubble so the body colour shows
+         through. One shape, so it can never misregister at small sizes. -->
+    <mask id="prompt">
+      <rect x="0" y="0" width="1024" height="1024" fill="#000"/>
+      <g fill="#FFF">
+        <path d="M 262 292
+                 h 500 a 84 84 0 0 1 84 84
+                 v 268 a 84 84 0 0 1 -84 84
+                 h -286
+                 l -150 106 a 16 16 0 0 1 -25 -13
+                 v -93
+                 h -39 a 84 84 0 0 1 -84 -84
+                 v -268 a 84 84 0 0 1 84 -84 z"/>
+      </g>
+      <g fill="none" stroke="#000" stroke-width="46" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="444,398 524,476 444,554"/>
+        <line x1="578" y1="554" x2="664" y2="554"/>
+      </g>
+    </mask>
+  </defs>
+
+  <g filter="url(#drop)">
+    <rect x="100" y="100" width="824" height="824" rx="185" ry="185" fill="url(#body)"/>
+    <rect x="100" y="100" width="824" height="824" rx="185" ry="185" fill="url(#sheen)"/>
+    <rect x="100" y="100" width="824" height="824" rx="185" ry="185" fill="none"
+          stroke="#FFFFFF" stroke-opacity="0.16" stroke-width="3"/>
+  </g>
+
+  <rect x="100" y="100" width="824" height="824" fill="#FFFFFF" mask="url(#prompt)"/>
+</svg>
